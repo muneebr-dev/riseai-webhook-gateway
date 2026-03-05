@@ -1,36 +1,76 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Webhook Gateway (Dev Only)
 
-## Getting Started
+A Next.js API-only service that receives platform webhooks on one public URL and forwards them to one or more local/Nest webhook endpoints.
 
-First, run the development server:
+## Architecture
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+```text
+Meta / Gmail PubSub / Outlook
+            |
+            v
+      Vercel Webhook Gateway
+            |
+            +--> http://localhost:3000/api/channels/webhook/:provider
+            +--> http://localhost:3001/api/channels/webhook/:provider
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Routes
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- `GET /api/health`
+- `GET /api/webhooks/meta/:provider` (`messenger | instagram | whatsapp`)
+- `POST /api/webhooks/meta/:provider`
+- `POST /api/webhooks/gmail`
+- `GET /api/webhooks/outlook`
+- `POST /api/webhooks/outlook`
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Forwarding Contract
 
-## Learn More
+The gateway forwards to:
 
-To learn more about Next.js, take a look at the following resources:
+- `GET|POST {TARGET_BASE_URL}/api/channels/webhook/:provider`
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Headers added to forwarded requests:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- `x-webhook-gateway-secret`
+- `x-webhook-gateway-provider`
+- `x-webhook-gateway-received-at`
+- `x-webhook-gateway-request-id`
 
-## Deploy on Vercel
+## Environment Variables
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Copy `.env.example` to `.env` and update values.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `TARGET_URLS`
+- `FORWARD_SHARED_SECRET`
+- `FORWARD_TIMEOUT_MS`
+- `LOG_LEVEL`
+- `MESSENGER_VERIFY_TOKEN`
+- `INSTAGRAM_VERIFY_TOKEN`
+- `WHATSAPP_VERIFY_TOKEN`
+- `TARGET_URLS_META`
+- `TARGET_URLS_GMAIL`
+- `TARGET_URLS_OUTLOOK`
+- `TARGET_URLS_MESSENGER`
+- `TARGET_URLS_INSTAGRAM`
+- `TARGET_URLS_WHATSAPP`
+- `REQUIRE_AT_LEAST_ONE_TARGET`
+- `REDACT_LOG_BODIES`
+
+Target precedence:
+
+1. Provider specific (`TARGET_URLS_MESSENGER`, etc.)
+2. Group specific (`TARGET_URLS_META`, `TARGET_URLS_GMAIL`, `TARGET_URLS_OUTLOOK`)
+3. Global (`TARGET_URLS`)
+
+## Local Run
+
+```bash
+pnpm install
+pnpm dev
+```
+
+## Troubleshooting
+
+- `403` on Meta verify: check provider verify token env values.
+- `All forwarding targets failed`: verify local servers are online and reachable.
+- Outlook validation issues: ensure `validationToken` is returned as plain text.
