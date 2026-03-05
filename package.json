@@ -1,5 +1,5 @@
 {
-  "name": "webhook-gateway",
+  "name": "riseai-webhook-gateway",
   "version": "0.1.0",
   "private": true,
   "scripts": {
