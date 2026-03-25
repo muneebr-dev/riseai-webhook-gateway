@@ -1,5 +1,11 @@
 export type MetaProvider = 'messenger' | 'instagram' | 'whatsapp';
-export type Provider = MetaProvider | 'gmail' | 'outlook';
+export type BookingProvider =
+  | 'google_calendar'
+  | 'outlook_calendar'
+  | 'calendly'
+  | 'square_appointments';
+
+export type Provider = MetaProvider | 'gmail' | 'outlook' | BookingProvider;
 
 export type ForwardResult = {
   target: string;

@@ -24,11 +24,20 @@ function parseNumber(value: string | undefined, defaultValue: number): number {
 export const gatewayConfig = {
   targetUrls: parseUrls(process.env.TARGET_URLS),
   targetUrlsMeta: parseUrls(process.env.TARGET_URLS_META),
+  targetUrlsBookings: parseUrls(process.env.TARGET_URLS_BOOKINGS),
   targetUrlsGmail: parseUrls(process.env.TARGET_URLS_GMAIL),
   targetUrlsOutlook: parseUrls(process.env.TARGET_URLS_OUTLOOK),
   targetUrlsMessenger: parseUrls(process.env.TARGET_URLS_MESSENGER),
   targetUrlsInstagram: parseUrls(process.env.TARGET_URLS_INSTAGRAM),
   targetUrlsWhatsapp: parseUrls(process.env.TARGET_URLS_WHATSAPP),
+  targetUrlsGoogleCalendar: parseUrls(process.env.TARGET_URLS_GOOGLE_CALENDAR),
+  targetUrlsOutlookCalendar: parseUrls(
+    process.env.TARGET_URLS_OUTLOOK_CALENDAR,
+  ),
+  targetUrlsCalendly: parseUrls(process.env.TARGET_URLS_CALENDLY),
+  targetUrlsSquareAppointments: parseUrls(
+    process.env.TARGET_URLS_SQUARE_APPOINTMENTS,
+  ),
   forwardSharedSecret: process.env.FORWARD_SHARED_SECRET ?? '',
   forwardTimeoutMs: parseNumber(
     process.env.FORWARD_TIMEOUT_MS,

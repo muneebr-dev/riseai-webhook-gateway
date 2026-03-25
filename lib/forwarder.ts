@@ -5,13 +5,50 @@ import { ForwardBatchResult, ForwardResult, Provider } from './types';
 
 function buildForwardUrl(targetBaseUrl: string, provider: Provider, queryString: string): string {
   const routeProvider = provider;
-  const targetPath = `/api/channels/webhook/${routeProvider}`;
+  const targetPath =
+    provider === 'google_calendar' ||
+    provider === 'outlook_calendar' ||
+    provider === 'calendly' ||
+    provider === 'square_appointments'
+      ? `/api/bookings/webhook/${routeProvider}`
+      : `/api/channels/webhook/${routeProvider}`;
   const base = `${targetBaseUrl}${targetPath}`;
   return queryString ? `${base}?${queryString}` : base;
 }
 
 function createTimeoutSignal(ms: number): AbortSignal {
   return AbortSignal.timeout(ms);
+}
+
+function buildForwardHeaders(
+  incomingHeaders: Headers,
+  provider: Provider,
+  requestId: string,
+  receivedAt: string,
+): Record<string, string> {
+  const headers: Record<string, string> = {};
+
+  for (const [key, value] of incomingHeaders.entries()) {
+    const normalizedKey = key.toLowerCase();
+    if (
+      normalizedKey === 'host' ||
+      normalizedKey === 'content-length' ||
+      normalizedKey === 'connection'
+    ) {
+      continue;
+    }
+    headers[normalizedKey] = value;
+  }
+
+  headers['content-type'] = incomingHeaders.get('content-type') ?? 'application/json';
+  headers['user-agent'] = incomingHeaders.get('user-agent') ?? 'webhook-gateway';
+  headers['x-webhook-gateway-secret'] = gatewayConfig.forwardSharedSecret;
+  headers['x-webhook-gateway-provider'] = provider;
+  headers['x-webhook-gateway-request-id'] = requestId;
+  headers['x-webhook-gateway-received-at'] = receivedAt;
+  headers['x-forwarded-for'] = incomingHeaders.get('x-forwarded-for') ?? '';
+
+  return headers;
 }
 
 export async function forwardWebhook(params: {
@@ -25,9 +62,12 @@ export async function forwardWebhook(params: {
 }): Promise<ForwardBatchResult> {
   const { provider, method, queryString, rawBody, incomingHeaders, requestId, receivedAt } = params;
   const targets = resolveTargets(provider);
-
-  const forwardedContentType = incomingHeaders.get('content-type') ?? 'application/json';
-  const forwardedUserAgent = incomingHeaders.get('user-agent') ?? 'webhook-gateway';
+  const forwardedHeaders = buildForwardHeaders(
+    incomingHeaders,
+    provider,
+    requestId,
+    receivedAt,
+  );
 
   const jobs = targets.map(async (targetBaseUrl): Promise<ForwardResult> => {
     const url = buildForwardUrl(targetBaseUrl, provider, queryString);
@@ -36,15 +76,7 @@ export async function forwardWebhook(params: {
     try {
       const response = await fetch(url, {
         method,
-        headers: {
-          'content-type': forwardedContentType,
-          'user-agent': forwardedUserAgent,
-          'x-webhook-gateway-secret': gatewayConfig.forwardSharedSecret,
-          'x-webhook-gateway-provider': provider,
-          'x-webhook-gateway-request-id': requestId,
-          'x-webhook-gateway-received-at': receivedAt,
-          'x-forwarded-for': incomingHeaders.get('x-forwarded-for') ?? '',
-        },
+        headers: forwardedHeaders,
         body: rawBody,
         signal: createTimeoutSignal(gatewayConfig.forwardTimeoutMs),
       });

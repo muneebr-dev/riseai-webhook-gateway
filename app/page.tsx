@@ -30,6 +30,18 @@ export default function HomePage() {
         <li>
           <code>GET|POST /api/webhooks/outlook</code>
         </li>
+        <li>
+          <code>POST /api/webhooks/bookings/google-calendar</code>
+        </li>
+        <li>
+          <code>GET|POST /api/webhooks/bookings/outlook-calendar</code>
+        </li>
+        <li>
+          <code>POST /api/webhooks/bookings/calendly</code>
+        </li>
+        <li>
+          <code>POST /api/webhooks/bookings/square</code>
+        </li>
       </ul>
 
       <h2 style={{ marginTop: "16px", marginBottom: "8px" }}>Quick Start</h2>
