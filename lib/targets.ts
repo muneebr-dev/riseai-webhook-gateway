@@ -25,7 +25,13 @@ export function resolveTargets(provider: Provider): string[] {
                   ? cfg.targetUrlsOutlookCalendar
                   : provider === 'calendly'
                     ? cfg.targetUrlsCalendly
-                    : cfg.targetUrlsSquareAppointments;
+                    : provider === 'square_appointments'
+                      ? cfg.targetUrlsSquareAppointments
+                      : provider === 'shopify'
+                        ? cfg.targetUrlsShopify
+                        : provider === 'wix'
+                          ? cfg.targetUrlsWix
+                          : cfg.targetUrlsWoocommerce;
 
   if (providerSpecific.length > 0) return dedupe(providerSpecific);
 
@@ -40,6 +46,14 @@ export function resolveTargets(provider: Provider): string[] {
     provider === 'square_appointments'
   ) {
     if (cfg.targetUrlsBookings.length > 0) return dedupe(cfg.targetUrlsBookings);
+  }
+
+  if (
+    provider === 'shopify' ||
+    provider === 'wix' ||
+    provider === 'woocommerce'
+  ) {
+    if (cfg.targetUrlsCommerce.length > 0) return dedupe(cfg.targetUrlsCommerce);
   }
 
   return dedupe(cfg.targetUrls);

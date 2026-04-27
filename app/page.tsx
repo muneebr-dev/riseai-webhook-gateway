@@ -42,6 +42,15 @@ export default function HomePage() {
         <li>
           <code>POST /api/webhooks/bookings/square</code>
         </li>
+        <li>
+          <code>POST /api/webhooks/commerce/shopify</code>
+        </li>
+        <li>
+          <code>POST /api/webhooks/commerce/wix</code>
+        </li>
+        <li>
+          <code>POST /api/webhooks/commerce/woocommerce</code>
+        </li>
       </ul>
 
       <h2 style={{ marginTop: "16px", marginBottom: "8px" }}>Quick Start</h2>

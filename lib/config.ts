@@ -25,6 +25,7 @@ export const gatewayConfig = {
   targetUrls: parseUrls(process.env.TARGET_URLS),
   targetUrlsMeta: parseUrls(process.env.TARGET_URLS_META),
   targetUrlsBookings: parseUrls(process.env.TARGET_URLS_BOOKINGS),
+  targetUrlsCommerce: parseUrls(process.env.TARGET_URLS_COMMERCE),
   targetUrlsGmail: parseUrls(process.env.TARGET_URLS_GMAIL),
   targetUrlsOutlook: parseUrls(process.env.TARGET_URLS_OUTLOOK),
   targetUrlsMessenger: parseUrls(process.env.TARGET_URLS_MESSENGER),
@@ -38,6 +39,9 @@ export const gatewayConfig = {
   targetUrlsSquareAppointments: parseUrls(
     process.env.TARGET_URLS_SQUARE_APPOINTMENTS,
   ),
+  targetUrlsShopify: parseUrls(process.env.TARGET_URLS_SHOPIFY),
+  targetUrlsWix: parseUrls(process.env.TARGET_URLS_WIX),
+  targetUrlsWoocommerce: parseUrls(process.env.TARGET_URLS_WOOCOMMERCE),
   forwardSharedSecret: process.env.FORWARD_SHARED_SECRET ?? '',
   forwardTimeoutMs: parseNumber(
     process.env.FORWARD_TIMEOUT_MS,

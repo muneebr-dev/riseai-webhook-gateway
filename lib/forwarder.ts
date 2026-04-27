@@ -11,6 +11,10 @@ function buildForwardUrl(targetBaseUrl: string, provider: Provider, queryString:
     provider === 'calendly' ||
     provider === 'square_appointments'
       ? `/api/bookings/webhook/${routeProvider}`
+      : provider === 'shopify' ||
+          provider === 'wix' ||
+          provider === 'woocommerce'
+        ? `/api/commerce/webhook/${routeProvider}`
       : `/api/channels/webhook/${routeProvider}`;
   const base = `${targetBaseUrl}${targetPath}`;
   return queryString ? `${base}?${queryString}` : base;

@@ -29,6 +29,10 @@ Meta / Gmail PubSub / Outlook / Booking Providers
 - `POST /api/webhooks/bookings/calendly`
 - `POST /api/webhooks/bookings/square`
 - `POST /api/webhooks/bookings/:provider` (`google_calendar | outlook_calendar | calendly | square_appointments`)
+- `POST /api/webhooks/commerce/shopify`
+- `POST /api/webhooks/commerce/wix`
+- `POST /api/webhooks/commerce/woocommerce`
+- `POST /api/webhooks/commerce/:provider` (`shopify | wix | woocommerce`)
 
 ## Forwarding Contract
 
@@ -36,6 +40,7 @@ The gateway forwards to:
 
 - `GET|POST {TARGET_BASE_URL}/api/channels/webhook/:provider`
 - `GET|POST {TARGET_BASE_URL}/api/bookings/webhook/:provider`
+- `POST {TARGET_BASE_URL}/api/commerce/webhook/:provider`
 
 Headers added to forwarded requests:
 
@@ -57,6 +62,7 @@ Copy `.env.example` to `.env` and update values.
 - `WHATSAPP_VERIFY_TOKEN`
 - `TARGET_URLS_META`
 - `TARGET_URLS_BOOKINGS`
+- `TARGET_URLS_COMMERCE`
 - `TARGET_URLS_GMAIL`
 - `TARGET_URLS_OUTLOOK`
 - `TARGET_URLS_MESSENGER`
@@ -66,13 +72,16 @@ Copy `.env.example` to `.env` and update values.
 - `TARGET_URLS_OUTLOOK_CALENDAR`
 - `TARGET_URLS_CALENDLY`
 - `TARGET_URLS_SQUARE_APPOINTMENTS`
+- `TARGET_URLS_SHOPIFY`
+- `TARGET_URLS_WIX`
+- `TARGET_URLS_WOOCOMMERCE`
 - `REQUIRE_AT_LEAST_ONE_TARGET`
 - `REDACT_LOG_BODIES`
 
 Target precedence:
 
 1. Provider specific (`TARGET_URLS_MESSENGER`, `TARGET_URLS_GOOGLE_CALENDAR`, etc.)
-2. Group specific (`TARGET_URLS_META`, `TARGET_URLS_BOOKINGS`, `TARGET_URLS_GMAIL`, `TARGET_URLS_OUTLOOK`)
+2. Group specific (`TARGET_URLS_META`, `TARGET_URLS_BOOKINGS`, `TARGET_URLS_COMMERCE`, `TARGET_URLS_GMAIL`, `TARGET_URLS_OUTLOOK`)
 3. Global (`TARGET_URLS`)
 
 ## Local Run

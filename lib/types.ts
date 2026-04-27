@@ -5,7 +5,14 @@ export type BookingProvider =
   | 'calendly'
   | 'square_appointments';
 
-export type Provider = MetaProvider | 'gmail' | 'outlook' | BookingProvider;
+export type CommerceProvider = 'shopify' | 'wix' | 'woocommerce';
+
+export type Provider =
+  | MetaProvider
+  | 'gmail'
+  | 'outlook'
+  | BookingProvider
+  | CommerceProvider;
 
 export type ForwardResult = {
   target: string;
