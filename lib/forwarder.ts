@@ -6,7 +6,9 @@ import { ForwardBatchResult, ForwardResult, Provider } from './types';
 function buildForwardUrl(targetBaseUrl: string, provider: Provider, queryString: string): string {
   const routeProvider = provider;
   const targetPath =
-    provider === 'google_calendar' ||
+    provider === 'stripe'
+      ? '/api/webhooks/stripe'
+      : provider === 'google_calendar' ||
     provider === 'outlook_calendar' ||
     provider === 'calendly' ||
     provider === 'square_appointments'

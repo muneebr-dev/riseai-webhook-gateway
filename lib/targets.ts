@@ -31,7 +31,9 @@ export function resolveTargets(provider: Provider): string[] {
                         ? cfg.targetUrlsShopify
                         : provider === 'wix'
                           ? cfg.targetUrlsWix
-                          : cfg.targetUrlsWoocommerce;
+                          : provider === 'woocommerce'
+                        ? cfg.targetUrlsWoocommerce
+                        : cfg.targetUrlsStripe;
 
   if (providerSpecific.length > 0) return dedupe(providerSpecific);
 

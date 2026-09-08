@@ -42,6 +42,7 @@ export const gatewayConfig = {
   targetUrlsShopify: parseUrls(process.env.TARGET_URLS_SHOPIFY),
   targetUrlsWix: parseUrls(process.env.TARGET_URLS_WIX),
   targetUrlsWoocommerce: parseUrls(process.env.TARGET_URLS_WOOCOMMERCE),
+  targetUrlsStripe: parseUrls(process.env.TARGET_URLS_STRIPE),
   forwardSharedSecret: process.env.FORWARD_SHARED_SECRET ?? '',
   forwardTimeoutMs: parseNumber(
     process.env.FORWARD_TIMEOUT_MS,

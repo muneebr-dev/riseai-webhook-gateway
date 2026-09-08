@@ -11,6 +11,7 @@ export type Provider =
   | MetaProvider
   | 'gmail'
   | 'outlook'
+  | 'stripe'
   | BookingProvider
   | CommerceProvider;
 
