@@ -33,6 +33,7 @@ Meta / Gmail PubSub / Outlook / Booking Providers
 - `POST /api/webhooks/commerce/wix`
 - `POST /api/webhooks/commerce/woocommerce`
 - `POST /api/webhooks/commerce/:provider` (`shopify | wix | woocommerce`)
+- `POST /api/webhooks/ses` (AWS SNS: SES bounce/complaint/delivery + subscription confirmations)
 
 ## Forwarding Contract
 
@@ -41,6 +42,8 @@ The gateway forwards to:
 - `GET|POST {TARGET_BASE_URL}/api/channels/webhook/:provider`
 - `GET|POST {TARGET_BASE_URL}/api/bookings/webhook/:provider`
 - `POST {TARGET_BASE_URL}/api/commerce/webhook/:provider`
+- `POST {TARGET_BASE_URL}/api/webhooks/stripe`
+- `POST {TARGET_BASE_URL}/api/webhooks/ses`
 
 Headers added to forwarded requests:
 
@@ -75,6 +78,8 @@ Copy `.env.example` to `.env` and update values.
 - `TARGET_URLS_SHOPIFY`
 - `TARGET_URLS_WIX`
 - `TARGET_URLS_WOOCOMMERCE`
+- `TARGET_URLS_STRIPE`
+- `TARGET_URLS_SES`
 - `REQUIRE_AT_LEAST_ONE_TARGET`
 - `REDACT_LOG_BODIES`
 

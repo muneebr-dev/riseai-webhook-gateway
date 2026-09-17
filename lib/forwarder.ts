@@ -8,7 +8,9 @@ function buildForwardUrl(targetBaseUrl: string, provider: Provider, queryString:
   const targetPath =
     provider === 'stripe'
       ? '/api/webhooks/stripe'
-      : provider === 'google_calendar' ||
+      : provider === 'ses'
+        ? '/api/webhooks/ses'
+        : provider === 'google_calendar' ||
     provider === 'outlook_calendar' ||
     provider === 'calendly' ||
     provider === 'square_appointments'

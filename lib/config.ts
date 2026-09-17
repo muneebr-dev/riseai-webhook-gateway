@@ -43,6 +43,7 @@ export const gatewayConfig = {
   targetUrlsWix: parseUrls(process.env.TARGET_URLS_WIX),
   targetUrlsWoocommerce: parseUrls(process.env.TARGET_URLS_WOOCOMMERCE),
   targetUrlsStripe: parseUrls(process.env.TARGET_URLS_STRIPE),
+  targetUrlsSes: parseUrls(process.env.TARGET_URLS_SES),
   forwardSharedSecret: process.env.FORWARD_SHARED_SECRET ?? '',
   forwardTimeoutMs: parseNumber(
     process.env.FORWARD_TIMEOUT_MS,
