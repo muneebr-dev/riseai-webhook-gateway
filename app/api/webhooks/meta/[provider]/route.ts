@@ -1,7 +1,7 @@
 import { randomUUID } from 'crypto';
 import { NextRequest, NextResponse } from 'next/server';
 import { gatewayConfig } from '@/lib/config';
-import { forwardWebhook } from '@/lib/forwarder';
+import { allTargetsUnauthorized, forwardWebhook } from '@/lib/forwarder';
 import { logError, logInfo, redactBodyIfNeeded } from '@/lib/logging';
 import { verifyMetaChallenge } from '@/lib/meta-verify';
 import { MetaProvider } from '@/lib/types';
@@ -65,6 +65,14 @@ export async function POST(
   });
 
   const allFailed = result.targetCount > 0 && result.successCount === 0;
+
+  if (allTargetsUnauthorized(result)) {
+    logError('webhook.forward.all_targets_unauthorized', { requestId, provider });
+    return NextResponse.json(
+      { error: 'Webhook rejected by target', requestId },
+      { status: 401 },
+    );
+  }
 
   if (gatewayConfig.requireAtLeastOneTarget && allFailed) {
     return NextResponse.json({ error: 'All forwarding targets failed', requestId }, { status: 502 });

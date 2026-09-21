@@ -70,6 +70,20 @@ export async function forwardWebhook(params: {
 }): Promise<ForwardBatchResult> {
   const { provider, method, queryString, rawBody, incomingHeaders, requestId, receivedAt } = params;
   const targets = resolveTargets(provider);
+
+  // Forwarding without the shared secret would make every downstream target
+  // reject the request (the API requires the gateway secret) — fail fast with
+  // a configuration error instead of silently forwarding doomed requests.
+  if (targets.length > 0 && !gatewayConfig.forwardSharedSecret) {
+    logError('webhook.forward.misconfigured_secret', {
+      requestId,
+      provider,
+    });
+    throw new Error(
+      'FORWARD_SHARED_SECRET is not configured — refusing to forward webhooks',
+    );
+  }
+
   const forwardedHeaders = buildForwardHeaders(
     incomingHeaders,
     provider,
@@ -135,4 +149,18 @@ export async function forwardWebhook(params: {
   }
 
   return summary;
+}
+
+/**
+ * True when at least one target exists and every target answered 401 — i.e.
+ * the API rejected the event as unauthenticated. Routes surface this as an
+ * outward 401 so upstream senders can distinguish "rejected" from a
+ * transient delivery failure (502) or success (200).
+ */
+export function allTargetsUnauthorized(result: ForwardBatchResult): boolean {
+  return (
+    result.targetCount > 0 &&
+    result.successCount === 0 &&
+    result.results.every((r) => r.status === 401)
+  );
 }
