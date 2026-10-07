@@ -67,8 +67,10 @@ export async function forwardWebhook(params: {
   incomingHeaders: Headers;
   requestId: string;
   receivedAt: string;
+  timeoutMs?: number;
 }): Promise<ForwardBatchResult> {
   const { provider, method, queryString, rawBody, incomingHeaders, requestId, receivedAt } = params;
+  const timeoutMs = params.timeoutMs ?? gatewayConfig.forwardTimeoutMs;
   const targets = resolveTargets(provider);
 
   // Forwarding without the shared secret would make every downstream target
@@ -100,7 +102,7 @@ export async function forwardWebhook(params: {
         method,
         headers: forwardedHeaders,
         body: rawBody,
-        signal: createTimeoutSignal(gatewayConfig.forwardTimeoutMs),
+        signal: createTimeoutSignal(timeoutMs),
       });
 
       return {

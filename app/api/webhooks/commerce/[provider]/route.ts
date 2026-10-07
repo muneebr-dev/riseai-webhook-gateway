@@ -5,6 +5,10 @@ import { gatewayConfig } from '@/lib/config';
 import { allTargetsUnauthorized, forwardWebhook } from '@/lib/forwarder';
 import { logError, logInfo, redactBodyIfNeeded } from '@/lib/logging';
 
+// Shopify allows 5 seconds for the whole delivery, so the API gets less than
+// that and a slow API reads as a failure Shopify will retry.
+const SHOPIFY_FORWARD_TIMEOUT_MS = 4000;
+
 export async function POST(
   request: NextRequest,
   context: { params: Promise<{ provider: string }> },
@@ -40,6 +44,7 @@ export async function POST(
     incomingHeaders: request.headers,
     requestId,
     receivedAt,
+    timeoutMs: provider === 'shopify' ? SHOPIFY_FORWARD_TIMEOUT_MS : undefined,
   });
 
   const allFailed = result.targetCount > 0 && result.successCount === 0;
@@ -52,7 +57,10 @@ export async function POST(
     );
   }
 
-  if (gatewayConfig.requireAtLeastOneTarget && allFailed) {
+  // Shopify only retries on a non-2xx answer; acknowledging a delivery the API
+  // never processed would lose it (including mandatory privacy requests).
+  const mustRetry = gatewayConfig.requireAtLeastOneTarget || provider === 'shopify';
+  if (mustRetry && allFailed) {
     return NextResponse.json(
       { error: 'All forwarding targets failed', requestId },
       { status: 502 },
