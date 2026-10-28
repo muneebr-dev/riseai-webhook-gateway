@@ -1,6 +1,8 @@
-# Webhook Gateway (Dev Only)
+# Webhook Gateway
 
 A Next.js API-only service that receives platform webhooks on one public URL and forwards them to one or more local/Nest webhook endpoints.
+
+Mostly used for development. The Shopify route is also used in production: `shopify-extension/shopify.app.toml` registers the mandatory compliance webhooks (`customers/data_request`, `customers/redact`, `shop/redact`) at `https://riseai-webhook-gateway.vercel.app/api/webhooks/commerce/shopify`, and the API registers its other Shopify webhooks (orders, `app/uninstalled`, etc.) at `SHOPIFY_WEBHOOK_URL`, which in `api/.env.staging` points at the same address. The API rejects Shopify deliveries that lack `x-webhook-gateway-secret`, so this route must stay deployed and `TARGET_URLS_SHOPIFY` (or `TARGET_URLS_COMMERCE`) must point at the production API.
 
 ## Architecture
 
