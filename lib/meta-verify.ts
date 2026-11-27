@@ -15,10 +15,10 @@ export function verifyMetaChallenge(
 
   const expectedToken =
     provider === 'messenger'
-      ? gatewayConfig.messengerVerifyToken
+      ? gatewayConfig().messengerVerifyToken
       : provider === 'instagram'
-        ? gatewayConfig.instagramVerifyToken
-        : gatewayConfig.whatsappVerifyToken;
+        ? gatewayConfig().instagramVerifyToken
+        : gatewayConfig().whatsappVerifyToken;
 
   if (!expectedToken || token !== expectedToken) {
     return null;

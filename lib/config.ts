@@ -21,41 +21,61 @@ function parseNumber(value: string | undefined, defaultValue: number): number {
   return parsed;
 }
 
-export const gatewayConfig = {
-  targetUrls: parseUrls(process.env.TARGET_URLS),
-  targetUrlsMeta: parseUrls(process.env.TARGET_URLS_META),
-  targetUrlsBookings: parseUrls(process.env.TARGET_URLS_BOOKINGS),
-  targetUrlsCommerce: parseUrls(process.env.TARGET_URLS_COMMERCE),
-  targetUrlsGmail: parseUrls(process.env.TARGET_URLS_GMAIL),
-  targetUrlsOutlook: parseUrls(process.env.TARGET_URLS_OUTLOOK),
-  targetUrlsMessenger: parseUrls(process.env.TARGET_URLS_MESSENGER),
-  targetUrlsInstagram: parseUrls(process.env.TARGET_URLS_INSTAGRAM),
-  targetUrlsWhatsapp: parseUrls(process.env.TARGET_URLS_WHATSAPP),
-  targetUrlsGoogleCalendar: parseUrls(process.env.TARGET_URLS_GOOGLE_CALENDAR),
-  targetUrlsOutlookCalendar: parseUrls(
-    process.env.TARGET_URLS_OUTLOOK_CALENDAR,
-  ),
-  targetUrlsCalendly: parseUrls(process.env.TARGET_URLS_CALENDLY),
-  targetUrlsSquareAppointments: parseUrls(
-    process.env.TARGET_URLS_SQUARE_APPOINTMENTS,
-  ),
-  targetUrlsShopify: parseUrls(process.env.TARGET_URLS_SHOPIFY),
-  targetUrlsWix: parseUrls(process.env.TARGET_URLS_WIX),
-  targetUrlsWoocommerce: parseUrls(process.env.TARGET_URLS_WOOCOMMERCE),
-  targetUrlsStripe: parseUrls(process.env.TARGET_URLS_STRIPE),
-  targetUrlsSes: parseUrls(process.env.TARGET_URLS_SES),
-  forwardSharedSecret: process.env.FORWARD_SHARED_SECRET ?? '',
-  forwardTimeoutMs: parseNumber(
-    process.env.FORWARD_TIMEOUT_MS,
-    DEFAULT_FORWARD_TIMEOUT_MS,
-  ),
-  logLevel: process.env.LOG_LEVEL ?? 'info',
-  requireAtLeastOneTarget: parseBoolean(
-    process.env.REQUIRE_AT_LEAST_ONE_TARGET,
-    false,
-  ),
-  redactLogBodies: parseBoolean(process.env.REDACT_LOG_BODIES, true),
-  messengerVerifyToken: process.env.MESSENGER_VERIFY_TOKEN ?? '',
-  instagramVerifyToken: process.env.INSTAGRAM_VERIFY_TOKEN ?? '',
-  whatsappVerifyToken: process.env.WHATSAPP_VERIFY_TOKEN ?? '',
-};
+function readConfig() {
+  return {
+    targetUrls: parseUrls(process.env.TARGET_URLS),
+    targetUrlsMeta: parseUrls(process.env.TARGET_URLS_META),
+    targetUrlsBookings: parseUrls(process.env.TARGET_URLS_BOOKINGS),
+    targetUrlsCommerce: parseUrls(process.env.TARGET_URLS_COMMERCE),
+    targetUrlsGmail: parseUrls(process.env.TARGET_URLS_GMAIL),
+    targetUrlsOutlook: parseUrls(process.env.TARGET_URLS_OUTLOOK),
+    targetUrlsMessenger: parseUrls(process.env.TARGET_URLS_MESSENGER),
+    targetUrlsInstagram: parseUrls(process.env.TARGET_URLS_INSTAGRAM),
+    targetUrlsWhatsapp: parseUrls(process.env.TARGET_URLS_WHATSAPP),
+    targetUrlsGoogleCalendar: parseUrls(process.env.TARGET_URLS_GOOGLE_CALENDAR),
+    targetUrlsOutlookCalendar: parseUrls(
+      process.env.TARGET_URLS_OUTLOOK_CALENDAR,
+    ),
+    targetUrlsCalendly: parseUrls(process.env.TARGET_URLS_CALENDLY),
+    targetUrlsSquareAppointments: parseUrls(
+      process.env.TARGET_URLS_SQUARE_APPOINTMENTS,
+    ),
+    targetUrlsShopify: parseUrls(process.env.TARGET_URLS_SHOPIFY),
+    targetUrlsWix: parseUrls(process.env.TARGET_URLS_WIX),
+    targetUrlsWoocommerce: parseUrls(process.env.TARGET_URLS_WOOCOMMERCE),
+    targetUrlsStripe: parseUrls(process.env.TARGET_URLS_STRIPE),
+    targetUrlsSes: parseUrls(process.env.TARGET_URLS_SES),
+    forwardSharedSecret: process.env.FORWARD_SHARED_SECRET ?? '',
+    forwardTimeoutMs: parseNumber(
+      process.env.FORWARD_TIMEOUT_MS,
+      DEFAULT_FORWARD_TIMEOUT_MS,
+    ),
+    logLevel: process.env.LOG_LEVEL ?? 'info',
+    requireAtLeastOneTarget: parseBoolean(
+      process.env.REQUIRE_AT_LEAST_ONE_TARGET,
+      false,
+    ),
+    redactLogBodies: parseBoolean(process.env.REDACT_LOG_BODIES, true),
+    messengerVerifyToken: process.env.MESSENGER_VERIFY_TOKEN ?? '',
+    instagramVerifyToken: process.env.INSTAGRAM_VERIFY_TOKEN ?? '',
+    whatsappVerifyToken: process.env.WHATSAPP_VERIFY_TOKEN ?? '',
+  };
+}
+
+export type GatewayConfig = ReturnType<typeof readConfig>;
+
+let cached: GatewayConfig | null = null;
+
+/**
+ * Settings from process.env, read on first use so the Lambda can load its
+ * Secrets Manager values into process.env before anything reads them.
+ */
+export function gatewayConfig(): GatewayConfig {
+  cached ??= readConfig();
+  return cached;
+}
+
+/** Forget the cached settings (tests change process.env between cases). */
+export function resetGatewayConfig(): void {
+  cached = null;
+}

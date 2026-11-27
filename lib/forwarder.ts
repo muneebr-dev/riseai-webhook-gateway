@@ -50,7 +50,7 @@ function buildForwardHeaders(
 
   headers['content-type'] = incomingHeaders.get('content-type') ?? 'application/json';
   headers['user-agent'] = incomingHeaders.get('user-agent') ?? 'webhook-gateway';
-  headers['x-webhook-gateway-secret'] = gatewayConfig.forwardSharedSecret;
+  headers['x-webhook-gateway-secret'] = gatewayConfig().forwardSharedSecret;
   headers['x-webhook-gateway-provider'] = provider;
   headers['x-webhook-gateway-request-id'] = requestId;
   headers['x-webhook-gateway-received-at'] = receivedAt;
@@ -63,20 +63,20 @@ export async function forwardWebhook(params: {
   provider: Provider;
   method: 'POST';
   queryString: string;
-  rawBody: ArrayBuffer;
+  rawBody: Uint8Array<ArrayBuffer>;
   incomingHeaders: Headers;
   requestId: string;
   receivedAt: string;
   timeoutMs?: number;
 }): Promise<ForwardBatchResult> {
   const { provider, method, queryString, rawBody, incomingHeaders, requestId, receivedAt } = params;
-  const timeoutMs = params.timeoutMs ?? gatewayConfig.forwardTimeoutMs;
+  const timeoutMs = params.timeoutMs ?? gatewayConfig().forwardTimeoutMs;
   const targets = resolveTargets(provider);
 
   // Forwarding without the shared secret would make every downstream target
   // reject the request (the API requires the gateway secret) — fail fast with
   // a configuration error instead of silently forwarding doomed requests.
-  if (targets.length > 0 && !gatewayConfig.forwardSharedSecret) {
+  if (targets.length > 0 && !gatewayConfig().forwardSharedSecret) {
     logError('webhook.forward.misconfigured_secret', {
       requestId,
       provider,

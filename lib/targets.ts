@@ -6,7 +6,7 @@ function dedupe(urls: string[]): string[] {
 }
 
 export function resolveTargets(provider: Provider): string[] {
-  const cfg = gatewayConfig;
+  const cfg = gatewayConfig();
 
   const providerSpecific =
     provider === 'messenger'
