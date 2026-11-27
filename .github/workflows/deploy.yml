@@ -1,0 +1,70 @@
+name: Deploy webhook gateway
+
+# staging    - every push to the staging branch
+# production - publishing a GitHub release (vX.Y.Z tag on main)
+# rollback   - Actions > Run workflow, pick a tag under "Use workflow from"
+on:
+  push:
+    branches: [staging]
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Environment to deploy the selected ref to
+        type: choice
+        options: [staging, production]
+        default: staging
+
+concurrency:
+  group: deploy-${{ github.event_name == 'release' && 'production' || inputs.target || 'staging' }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    # Each GitHub Environment carries vars AWS_DEPLOY_ROLE_ARN,
+    # LAMBDA_FUNCTION_NAME and GATEWAY_URL (Terraform outputs in riseai-infra).
+    environment: ${{ github.event_name == 'release' && 'production' || inputs.target || 'staging' }}
+    env:
+      TARGET_ENV: ${{ github.event_name == 'release' && 'production' || inputs.target || 'staging' }}
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Check the production target
+        if: env.TARGET_ENV == 'production'
+        run: |
+          [ "${{ github.ref_type }}" = tag ] || { echo "::error::Production deploys a tag; pick one under 'Use workflow from'"; exit 1; }
+
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm package
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ap-southeast-2
+
+      - name: Update the Lambda code
+        run: |
+          aws lambda update-function-code --function-name "${{ vars.LAMBDA_FUNCTION_NAME }}" \
+            --zip-file fileb://dist/lambda.zip --query 'LastUpdateStatus' --output text
+          aws lambda wait function-updated-v2 --function-name "${{ vars.LAMBDA_FUNCTION_NAME }}"
+
+      - name: Health check
+        run: |
+          for i in 1 2 3 4 5; do
+            curl -fsS "${{ vars.GATEWAY_URL }}/api/health" && exit 0
+            sleep 3
+          done
+          echo "::error::Gateway health check failed"; exit 1
